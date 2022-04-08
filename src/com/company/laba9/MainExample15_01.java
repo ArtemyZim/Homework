@@ -28,7 +28,7 @@ public class MainExample15_01 {
         System.out.println("Время выполнения операции удаления элемента для ArrayList" +
                 " в начале, в середине и в конце соответственно: " + getRunningTimeRemove(newArrayList));
         System.out.println();
-        System.out.println("Отчистим наши списки");
+        System.out.println("Очистим наши списки");
         newHashMap.clear();
         newTreeSet.clear();
         newArrayList.clear();
