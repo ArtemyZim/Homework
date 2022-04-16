@@ -12,7 +12,7 @@ public class Penguins {
         for (int i = 0; i < num_records; i++){
             switch (scan.nextLine().charAt(0)) {
                 case 'E': Es++; break;
-                case 'M': Ms++; break;
+                case 'M': Ms++; break;          //Использовать enchanced switch не рекомендуется
                 case 'L': Ls++; break;
             }
         }
