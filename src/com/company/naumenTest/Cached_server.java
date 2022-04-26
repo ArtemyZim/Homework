@@ -86,8 +86,8 @@ public class Cached_server {
             }
             out.print(serverRequestCount);
 
-        } catch (IOException e){
-            System.out.println("Ошибка! " + e.getMessage());
+        } catch (IOException | NullPointerException e){
+            System.out.println("Error! " + e.getMessage());
         }
     }
 }
