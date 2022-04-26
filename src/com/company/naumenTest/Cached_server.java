@@ -6,60 +6,83 @@ import java.util.*;
 public class Cached_server {
     public static void main(String[] args){
 
-        int serverRequestCount = 0;         // Счетчик обращений к распределенной системе
-        int cachedNum;                      // Максимальное число запросов, которое может быть закэшировано
-        int requestsCount;                  // Число запросов
+        Scanner in = new Scanner(System.in);
 
-        String pathInput = "src/com/company/naumenTest/input.txt";
-        String pathOutput = "src/com/company/naumenTest/output.txt";
+        int serverRequestCount = 0;
+        int cachedNum;
+        int requestsCount;
 
-        List <Long> requestsList = new LinkedList<>();      //Создается связный список, который содержит номера запросов
-        Map <Long, Integer> hashKeysCount = new HashMap<>(); //Создается хэшмапа, которая содержит пары "номер запроса, количество"
-        Map <Long, Integer> cachedRequest = new HashMap<>();     //Создается хэшмапа, в которой будут храниться кэшированные запросы
+        System.out.println("Input your absolute path to the source data file");
+        String pathInput = in.next();
+        System.out.println("Input your absolute path to the output data file");
+        String pathOutput = in.next();
+
+        List <Long> requestsList = new LinkedList<>();
+        Map <Long, Integer> hashKeysCount = new HashMap<>();
+        Map <Long, Integer> cachedRequests = new HashMap<>();
+        Map <Long, Integer> requestsNextPositionCount = new HashMap<>();
 
         try(BufferedReader rd = new BufferedReader(new FileReader(pathInput));
             PrintWriter out = new PrintWriter(pathOutput)) {
 
-            String [] nums = rd.readLine().split(" ");  /* Считываем первую строку в исходном файле и присваиваем
-                                                                нашим переменным соответствующие значения */
+            String [] nums = rd.readLine().split(" ");
             cachedNum = Integer.parseInt(nums[0]);
             requestsCount = Integer.parseInt(nums[1]);
 
-            long requestNum;                            // Переменная, которая содержит номер считываемого запроса
+            long requestNum;
             for (int i = 0; i < requestsCount; i++){
 
                 requestNum = Long.parseLong(rd.readLine());
-                requestsList.add(requestNum);           // Добавление запросов в список
+                requestsList.add(requestNum);
 
-                // Добавление запросов в хэшмапу.
-                // Каждый запрос добавляется как ключ, а значение в данном ключе - количество таких запросов в файле
                 if (hashKeysCount.get(requestNum) == null) hashKeysCount.put(requestNum, 1);
                 else hashKeysCount.replace(requestNum, hashKeysCount.get(requestNum) + 1);
             }
 
-            long currentNum;                            // Переменная, содержащая текущий запрос, извлекаемый из списка
+            long currentNum;
             for (int i = 0; i < requestsCount; i++){
 
                 currentNum = requestsList.get(i);
-                hashKeysCount.replace(currentNum, hashKeysCount.get(currentNum) - 1);   // Уменьшаем значение текущего ключа на 1
+                hashKeysCount.replace(currentNum, hashKeysCount.get(currentNum) - 1);
 
-                if (!cachedRequest.containsKey(currentNum)){  // Если в кэше нет текущего запроса (ключа)
+                if (hashKeysCount.get(currentNum) != 0) {
 
-                    if (cachedRequest.size() < cachedNum){    // Если кэш не "забит" данными
-                        cachedRequest.put(currentNum, hashKeysCount.get(currentNum));   // Добавление текущего запроса в кэш
+                    for (int j = i + 1, k = 1; j < requestsCount; j++, k++) {
+                        if (currentNum == requestsList.get(j)) {
+                            requestsNextPositionCount.put(currentNum, k);
+                            break;
+                        }
                     }
-                    else {
-                         // Получение ключа из кэша с минимальным значением
-                         long key = Collections.min(cachedRequest.entrySet(), Map.Entry.comparingByValue()).getKey();
 
-                         if (cachedRequest.get(key) < hashKeysCount.get(currentNum)){  // Если значение ключа текущего запроса больше
-                             cachedRequest.remove(key);                               // Заменяем ключ с наименьшим значением на текущий
-                             cachedRequest.put(currentNum, hashKeysCount.get(currentNum));
-                         }
+                    if (!cachedRequests.containsKey(currentNum)) {
+
+                        if (cachedRequests.size() < cachedNum) {
+                            cachedRequests.put(currentNum, requestsNextPositionCount.get(currentNum));
+                        } else {
+                            long key = Collections.max(cachedRequests.entrySet(), Map.Entry.comparingByValue()).getKey();
+
+                            if (cachedRequests.get(key) > requestsNextPositionCount.get(currentNum)) {
+                                cachedRequests.remove(key);
+                                cachedRequests.put(currentNum, requestsNextPositionCount.get(currentNum));
+                            }
+                        }
+                        serverRequestCount++;
                     }
-                    serverRequestCount++;
+                }
+                else if (!cachedRequests.containsKey(currentNum)) serverRequestCount++;
 
-                } else cachedRequest.replace(currentNum, hashKeysCount.get(currentNum));
+                else {
+                    cachedRequests.remove(currentNum);
+                    requestsNextPositionCount.remove(currentNum);
+                }
+
+                for (Map.Entry<Long, Integer> entry : requestsNextPositionCount.entrySet()){
+                    requestsNextPositionCount.replace(entry.getKey(), entry.getValue() - 1);
+
+                    if (cachedRequests.containsKey(entry.getKey())) {
+                        cachedRequests.replace(entry.getKey(), requestsNextPositionCount.get(entry.getKey()));
+                    }
+                }
             }
             out.print(serverRequestCount);
 
