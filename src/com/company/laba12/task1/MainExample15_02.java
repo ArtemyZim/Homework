@@ -27,6 +27,5 @@ public class MainExample15_02 {
             out.flush();
             out.close();
         }
-
     }
 }

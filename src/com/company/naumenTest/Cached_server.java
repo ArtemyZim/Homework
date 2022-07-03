@@ -6,16 +6,12 @@ import java.util.*;
 public class Cached_server {
     public static void main(String[] args){
 
-        Scanner in = new Scanner(System.in);
-
         int serverRequestCount = 0;
         int cachedNum;
         int requestsCount;
 
-        System.out.println("Input your absolute path to the source data file");
-        String pathInput = in.next();
-        System.out.println("Input your absolute path to the output data file");
-        String pathOutput = in.next();
+        String pathInput = "./input.txt";
+        String pathOutput = "./output.txt";
 
         List <Long> requestsList = new LinkedList<>();
         Map <Long, Integer> hashKeysCount = new HashMap<>();
